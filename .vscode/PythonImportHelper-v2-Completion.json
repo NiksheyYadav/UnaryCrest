@@ -1,0 +1,20 @@
+[
+    {
+        "label": "TuringMachine",
+        "kind": 6,
+        "importPath": "turing-machine-addition",
+        "description": "turing-machine-addition",
+        "peekOfCode": "class TuringMachine:\n    \"\"\"\n    A Turing Machine simulator that performs unary addition.\n    The machine uses the following approach:\n    - Input format: \"111+11\" where numbers are represented in unary (1s)\n      and are separated by a '+' symbol\n    - Algorithm:\n      1. Move right through the first number\n      2. Replace the '+' symbol with '1'\n      3. Move right through the second number",
+        "detail": "turing-machine-addition",
+        "documentation": {}
+    },
+    {
+        "label": "run_tests",
+        "kind": 2,
+        "importPath": "turing-machine-addition",
+        "description": "turing-machine-addition",
+        "peekOfCode": "def run_tests():\n    \"\"\"Execute comprehensive test cases.\"\"\"\n    print(\"\\n\" + \"=\"*70)\n    print(\"TURING MACHINE SIMULATOR - TEST SUITE\")\n    print(\"=\"*70 + \"\\n\")\n    # Initialize machine\n    tm = TuringMachine()\n    tm.print_state_diagram()\n    # Test cases: (num1, num2, expected_result)\n    test_cases = [",
+        "detail": "turing-machine-addition",
+        "documentation": {}
+    }
+]
