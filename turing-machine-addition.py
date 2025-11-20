@@ -281,8 +281,42 @@ def run_tests():
 
 
 if __name__ == "__main__":
-    # Run all tests
-    passed, failed = run_tests()
+    import sys
+    import json
     
-    # Exit with appropriate code
-    exit(0 if failed == 0 else 1)
+    # Check for JSON mode
+    if '--json' in sys.argv:
+        # JSON mode: read from stdin, write to stdout
+        try:
+            # Read JSON input from stdin
+            input_data = json.load(sys.stdin)
+            a = input_data.get('a', '')
+            b = input_data.get('b', '')
+            speed_ms = input_data.get('speed_ms', 0)
+            
+            # Import and use the efficient simulator
+            from simulator import simulate_unary_addition
+            
+            # Run simulation
+            result = simulate_unary_addition(a, b, speed_ms)
+            
+            # Output JSON result to stdout
+            json.dump(result, sys.stdout)
+            sys.stdout.flush()
+            exit(0)
+        except Exception as e:
+            # Output error as JSON
+            error_result = {
+                'error': str(e),
+                'message': 'Simulation failed'
+            }
+            json.dump(error_result, sys.stdout)
+            sys.stdout.flush()
+            exit(1)
+    else:
+        # Original CLI mode
+        # Run all tests
+        passed, failed = run_tests()
+        
+        # Exit with appropriate code
+        exit(0 if failed == 0 else 1)

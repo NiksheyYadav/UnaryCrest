@@ -1,0 +1,29 @@
+{
+  "name": "unarycrest",
+  "version": "1.0.0",
+  "description": "Interactive Turing Machine Simulator with Next.js frontend and Python backend",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.54.0",
+    "eslint-config-next": "^14.0.0"
+  },
+  "keywords": [
+    "turing-machine",
+    "unary-arithmetic",
+    "next.js",
+    "python",
+    "simulator"
+  ],
+  "author": "",
+  "license": "MIT"
+}
