@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnaryCrest - Interactive Turing Machine Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 3em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .controls-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .input-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .input-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        input[type="number"] {
+            padding: 12px 20px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            font-size: 1.2em;
+            width: 150px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 15px rgba(118, 75, 162, 0.3);
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(245, 87, 108, 0.6);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .visualization-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+            text-align: center;
+        }
+
+        .tape-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            overflow-x: auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+        }
+
+        .tape-cell {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            background: white;
+            margin: 0 2px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tape-cell.head {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.15);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1.15);
+            }
+            50% {
+                transform: scale(1.25);
+            }
+        }
+
+        .tape-cell.blank {
+            color: #ccc;
+        }
+
+        .state-display {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            font-size: 1.3em;
+        }
+
+        .state-current {
+            font-weight: bold;
+            color: #764ba2;
+            font-size: 1.5em;
+            display: inline-block;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 10px;
+            margin: 0 10px;
+        }
+
+        .execution-log {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border: 2px solid #e9ecef;
+        }
+
+        .log-entry {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .log-entry:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .log-entry.highlight {
+            background: linear-gradient(90deg, #fff5cd 0%, #ffffff 100%);
+            border-left-color: #764ba2;
+        }
+
+        .result-display {
+            text-align: center;
+            padding: 30px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 15px;
+            font-size: 1.5em;
+            font-weight: bold;
+            display: none;
+        }
+
+        .result-display.show {
+            display: block;
+            animation: bounceIn 0.6s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .state-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin: 30px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            border-radius: 15px;
+        }
+
+        .state-node {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3em;
+            color: #667eea;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .state-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .state-node.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            animation: rotate 2s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg) scale(1.1);
+            }
+            100% {
+                transform: rotate(360deg) scale(1.1);
+            }
+        }
+
+        .state-node.halt {
+            border-color: #28a745;
+            border-width: 6px;
+        }
+
+        .info-panel {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-card {
+            padding: 20px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-card h3 {
+            color: #764ba2;
+            margin-bottom: 10px;
+        }
+
+        .info-card p {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            margin-top: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        footer p {
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        input[type="range"] {
+            width: 200px;
+            height: 8px;
+            border-radius: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            border: 3px solid #667eea;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            border: 3px solid #667eea;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            input[type="number"] {
+                width: 100%;
+            }
+
+            .tape-cell {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2em;
+            }
+
+            .state-node {
+                width: 80px;
+                height: 80px;
+                font-size: 1.1em;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 UnaryCrest</h1>
+            <p class="subtitle">Interactive Turing Machine Simulator for Unary Addition</p>
+            <p class="description">
+                Experience the beauty of computational theory through an interactive visualization of a Turing Machine 
+                performing unary arithmetic. Watch as the machine processes numbers represented as sequences of 1's 
+                and performs addition through elegant state transitions.
+            </p>
+        </header>
+
+        <div class="controls-section">
+            <h2>✨ Control Panel</h2>
+            <div class="input-group">
+                <div class="input-field">
+                    <label for="num1">First Number</label>
+                    <input type="number" id="num1" value="3" min="0" max="20">
+                </div>
+                <div style="font-size: 2em; font-weight: bold; color: #667eea;">+</div>
+                <div class="input-field">
+                    <label for="num2">Second Number</label>
+                    <input type="number" id="num2" value="2" min="0" max="20">
+                </div>
+            </div>
+            <div class="input-group">
+                <button class="btn btn-primary" onclick="runMachine()">▶ Run Simulation</button>
+                <button class="btn btn-secondary" onclick="stepMachine()" id="stepBtn" disabled>⏭ Step Forward</button>
+                <button class="btn btn-secondary" onclick="resetMachine()">🔄 Reset</button>
+            </div>
+            <div class="speed-control">
+                <label for="speed">Animation Speed:</label>
+                <input type="range" id="speed" min="100" max="2000" value="800" step="100">
+                <span id="speedLabel">800ms</span>
+            </div>
+        </div>
+
+        <div class="visualization-section">
+            <h2>📼 Tape Visualization</h2>
+            <div class="state-display">
+                Current State: <span class="state-current" id="currentState">q0</span>
+                <span style="margin-left: 30px;">Step: <span class="state-current" id="stepCount">0</span></span>
+            </div>
+            <div class="tape-container" id="tapeContainer">
+                <!-- Tape cells will be generated here -->
+            </div>
+            <div class="result-display" id="resultDisplay">
+                <!-- Result will be displayed here -->
+            </div>
+        </div>
+
+        <div class="visualization-section">
+            <h2>🔄 State Diagram</h2>
+            <div class="state-diagram" id="stateDiagram">
+                <div class="state-node" data-state="q0">q0</div>
+                <div class="state-node" data-state="q1">q1</div>
+                <div class="state-node" data-state="q2">q2</div>
+                <div class="state-node" data-state="q3">q3</div>
+                <div class="state-node" data-state="q4">q4</div>
+                <div class="state-node halt" data-state="q5">q5</div>
+            </div>
+        </div>
+
+        <div class="visualization-section">
+            <h2>📝 Execution Log</h2>
+            <div class="execution-log" id="executionLog">
+                <p style="text-align: center; color: #999;">Run a simulation to see the execution log...</p>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <h2>📚 About Unary Addition</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>🔢 What is Unary?</h3>
+                    <p>Unary is a base-1 numeral system where numbers are represented by sequences of 1's. For example, 3 is "111" and 5 is "11111".</p>
+                </div>
+                <div class="info-card">
+                    <h3>⚙️ How It Works</h3>
+                    <p>The Turing Machine reads through the first number, processes the '+' separator, moves through the second number, and produces the result through state transitions.</p>
+                </div>
+                <div class="info-card">
+                    <h3>🎯 States Explained</h3>
+                    <p>q0: Initial state, q1: Reserved, q2: Replace separator, q3: Process second number, q4: Finalize, q5: Halt (accept)</p>
+                </div>
+                <div class="info-card">
+                    <h3>💡 Algorithm</h3>
+                    <p>The machine performs addition by moving through both operands and utilizing clever state transitions. Time complexity: O(n+m)</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>UnaryCrest - Turing Machine Addition Simulator</strong></p>
+            <p>Automata Theory Project - B.Tech 5th Semester CSE</p>
+            <p>Created with ❤️ for computational theory education</p>
+        </footer>
+    </div>
+
+    <script>
+        class TuringMachine {
+            constructor() {
+                this.states = {
+                    'q0': 'Initial state - read first number',
+                    'q1': 'Move to end of first number',
+                    'q2': 'Replace + with 1',
+                    'q3': 'Move to end of second number',
+                    'q4': 'Move left and erase last 1',
+                    'q5': 'Halt state - accept'
+                };
+
+                this.transitions = {
+                    'q0,1': ['q0', '1', 'R'],
+                    'q0,+': ['q2', '+', 'R'],
+                    'q2,1': ['q3', '1', 'R'],
+                    'q3,1': ['q3', '1', 'R'],
+                    'q3,_': ['q4', '_', 'L'],
+                    'q4,1': ['q5', '1', 'S']
+                };
+
+                this.reset();
+            }
+
+            reset() {
+                this.tape = ['_'];
+                this.headPosition = 0;
+                this.currentState = 'q0';
+                this.executionLog = [];
+                this.stepNumber = 0;
+                this.halted = false;
+            }
+
+            initializeTape(num1, num2) {
+                this.reset();
+                this.tape = ['_'];
+                
+                // Add first number
+                for (let i = 0; i < num1; i++) {
+                    this.tape.push('1');
+                }
+                
+                // Add separator
+                this.tape.push('+');
+                
+                // Add second number
+                for (let i = 0; i < num2; i++) {
+                    this.tape.push('1');
+                }
+                
+                // Add ending blank
+                this.tape.push('_');
+                
+                this.headPosition = 1;
+            }
+
+            step() {
+                if (this.halted) return true;
+
+                const currentSymbol = this.tape[this.headPosition] || '_';
+                const transitionKey = `${this.currentState},${currentSymbol}`;
+                const transition = this.transitions[transitionKey];
+
+                if (!transition) {
+                    this.halted = true;
+                    return true;
+                }
+
+                const [newState, newSymbol, direction] = transition;
+
+                // Log the step
+                this.executionLog.push({
+                    step: this.stepNumber,
+                    state: this.currentState,
+                    symbol: currentSymbol,
+                    newState: newState,
+                    newSymbol: newSymbol,
+                    direction: direction,
+                    position: this.headPosition
+                });
+
+                // Write symbol
+                this.tape[this.headPosition] = newSymbol;
+
+                // Move head
+                if (direction === 'R') {
+                    this.headPosition++;
+                    if (this.headPosition >= this.tape.length) {
+                        this.tape.push('_');
+                    }
+                } else if (direction === 'L') {
+                    this.headPosition--;
+                    if (this.headPosition < 0) {
+                        this.tape.unshift('_');
+                        this.headPosition = 0;
+                    }
+                }
+
+                // Change state
+                this.currentState = newState;
+                this.stepNumber++;
+
+                if (newState === 'q5') {
+                    this.halted = true;
+                    return true;
+                }
+
+                return false;
+            }
+
+            getResult() {
+                let count = 0;
+                for (let symbol of this.tape) {
+                    if (symbol === '1') count++;
+                }
+                return count;
+            }
+        }
+
+        let tm = new TuringMachine();
+        let isRunning = false;
+        let animationTimeout = null;
+
+        function renderTape() {
+            const container = document.getElementById('tapeContainer');
+            container.innerHTML = '';
+            
+            tm.tape.forEach((symbol, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'tape-cell';
+                if (index === tm.headPosition) {
+                    cell.classList.add('head');
+                }
+                if (symbol === '_') {
+                    cell.classList.add('blank');
+                    cell.textContent = '□';
+                } else {
+                    cell.textContent = symbol;
+                }
+                container.appendChild(cell);
+            });
+        }
+
+        function updateStateDisplay() {
+            document.getElementById('currentState').textContent = tm.currentState;
+            document.getElementById('stepCount').textContent = tm.stepNumber;
+            
+            // Update state diagram
+            document.querySelectorAll('.state-node').forEach(node => {
+                node.classList.remove('active');
+                if (node.dataset.state === tm.currentState) {
+                    node.classList.add('active');
+                }
+            });
+        }
+
+        function updateExecutionLog() {
+            const logContainer = document.getElementById('executionLog');
+            logContainer.innerHTML = '';
+            
+            tm.executionLog.forEach((entry, index) => {
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                if (index === tm.executionLog.length - 1) {
+                    logEntry.classList.add('highlight');
+                }
+                logEntry.textContent = `Step ${entry.step}: δ(${entry.state}, '${entry.symbol}') = (${entry.newState}, '${entry.newSymbol}', ${entry.direction}) | Head: ${entry.position}`;
+                logContainer.appendChild(logEntry);
+            });
+            
+            // Scroll to bottom
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function showResult(num1, num2, result) {
+            const resultDisplay = document.getElementById('resultDisplay');
+            resultDisplay.innerHTML = `
+                <div>✅ Computation Complete!</div>
+                <div style="margin-top: 10px; font-size: 1.2em;">
+                    ${num1} + ${num2} = ${result}
+                </div>
+                <div style="margin-top: 10px; font-size: 0.8em; color: #666;">
+                    "${'1'.repeat(num1)} + ${'1'.repeat(num2)}" → "${'1'.repeat(result)}"
+                </div>
+            `;
+            resultDisplay.classList.add('show');
+        }
+
+        async function runMachine() {
+            if (isRunning) return;
+            
+            const num1 = parseInt(document.getElementById('num1').value) || 0;
+            const num2 = parseInt(document.getElementById('num2').value) || 0;
+            
+            if (num1 < 0 || num2 < 0 || num1 > 20 || num2 > 20) {
+                alert('Please enter numbers between 0 and 20');
+                return;
+            }
+
+            isRunning = true;
+            document.getElementById('resultDisplay').classList.remove('show');
+            
+            tm.initializeTape(num1, num2);
+            renderTape();
+            updateStateDisplay();
+            updateExecutionLog();
+
+            const speed = parseInt(document.getElementById('speed').value);
+            
+            const runStep = () => {
+                const halted = tm.step();
+                renderTape();
+                updateStateDisplay();
+                updateExecutionLog();
+                
+                if (!halted) {
+                    animationTimeout = setTimeout(runStep, speed);
+                } else {
+                    isRunning = false;
+                    showResult(num1, num2, tm.getResult());
+                }
+            };
+
+            setTimeout(runStep, speed);
+        }
+
+        function stepMachine() {
+            if (tm.halted) return;
+            
+            const halted = tm.step();
+            renderTape();
+            updateStateDisplay();
+            updateExecutionLog();
+            
+            if (halted) {
+                const num1 = parseInt(document.getElementById('num1').value) || 0;
+                const num2 = parseInt(document.getElementById('num2').value) || 0;
+                showResult(num1, num2, tm.getResult());
+            }
+        }
+
+        function resetMachine() {
+            if (animationTimeout) {
+                clearTimeout(animationTimeout);
+                animationTimeout = null;
+            }
+            isRunning = false;
+            
+            const num1 = parseInt(document.getElementById('num1').value) || 0;
+            const num2 = parseInt(document.getElementById('num2').value) || 0;
+            
+            tm.initializeTape(num1, num2);
+            renderTape();
+            updateStateDisplay();
+            document.getElementById('executionLog').innerHTML = '<p style="text-align: center; color: #999;">Run a simulation to see the execution log...</p>';
+            document.getElementById('resultDisplay').classList.remove('show');
+        }
+
+        // Update speed label
+        document.getElementById('speed').addEventListener('input', function() {
+            document.getElementById('speedLabel').textContent = this.value + 'ms';
+        });
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            resetMachine();
+        });
+
+        // Add state node tooltips
+        document.querySelectorAll('.state-node').forEach(node => {
+            const state = node.dataset.state;
+            node.title = tm.states[state];
+        });
+    </script>
+</body>
+</html>
